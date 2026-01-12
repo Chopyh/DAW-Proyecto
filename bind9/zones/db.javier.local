@@ -9,10 +9,10 @@ $TTL    604800
 @       IN      NS      ns1.javier.local.
 @       IN      A       172.20.0.16      
 
-ns1         IN  A   172.20.0.13
-ldap        IN  A   172.20.0.14
-tomcat      IN  A   172.20.0.15
-www         IN  A   172.20.0.16
+ns1     IN      A       172.20.0.13    ; DNS
+tomcat  IN      A       172.20.0.14    ; Tomcat
+www     IN      A       172.20.0.15    ; Apache
+ldap    IN      A       172.20.0.16    ; LDAP
 
 produccion  IN  CNAME   www
 pruebas     IN  CNAME   www

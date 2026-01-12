@@ -1,0 +1,4 @@
+AuthType Basic
+AuthName "Acceso Restringido Javier"
+AuthUserFile /usr/local/apache2/conf/.htpasswd
+Require valid-user
