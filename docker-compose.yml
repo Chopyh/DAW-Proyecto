@@ -45,21 +45,21 @@ services:
     dns:
       - 172.20.0.13
 
-  ldap:
-    image: osixia/openldap:latest
-    container_name: ldap_javier
-    environment:
-      LDAP_ORGANISATION: "EduTech Solutions"
-      LDAP_DOMAIN: "javier.local"
-      LDAP_ADMIN_PASSWORD: "admin"
-    networks:
-      red_daw:
-        ipv4_address: 172.20.0.16
-    ports:
-      - "389:389"
-      - "636:636"
-    dns:
-      - 172.20.0.13
+  # ldap:
+  #   image: osixia/openldap:latest
+  #   container_name: ldap_javier
+  #   environment:
+  #     LDAP_ORGANISATION: "EduTech Solutions"
+  #     LDAP_DOMAIN: "javier.local"
+  #     LDAP_ADMIN_PASSWORD: "admin"
+  #   networks:
+  #     red_daw:
+  #       ipv4_address: 172.20.0.16
+  #   ports:
+  #     - "389:389"
+  #     - "636:636"
+  #   dns:
+  #     - 172.20.0.13
 
 networks:
   red_daw:
