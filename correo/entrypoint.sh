@@ -1,25 +1,26 @@
 #!/bin/bash
+# --- correo/entrypoint.sh ---
 
-# --- SOLUCIÓN PERMANENTE PARTE 2 ---
-# Asegurar que Postfix tiene acceso a los archivos de red del contenedor
-# Esto debe hacerse al arrancar, porque Docker cambia la IP/DNS en cada inicio.
-
-# 1. Crear directorio dentro de la jaula (por si acaso Postfix decide usarla)
+# 1. Copiar archivos de red del sistema al entorno de Postfix
+# (Aunque chroot sea 'n', esto previene errores si alguna librería lo busca ahí)
 mkdir -p /var/spool/postfix/etc
-
-# 2. Copiar los archivos vitales del sistema actual
 cp /etc/resolv.conf /var/spool/postfix/etc/resolv.conf
-cp /etc/services /var/spool/postfix/etc/services
 cp /etc/hosts /var/spool/postfix/etc/hosts
+cp /etc/services /var/spool/postfix/etc/services
 
-# 3. Arrancar servicios
-echo "Arrancando Postfix..."
+# Asegurar permisos
+chmod 644 /var/spool/postfix/etc/*
+
+# 2. Iniciar Syslog (Para ver errores reales si falla)
+service rsyslog start
+
+# 3. Iniciar Servicios
+echo "Iniciando Postfix..."
 service postfix start
 
-echo "Arrancando Dovecot..."
+echo "Iniciando Dovecot..."
 service dovecot start
 
-# 4. Mantener el contenedor vivo
-echo "Servidor de correo listo. Mostrando logs..."
-touch /var/log/mail.log
+# 4. Loop de logs
+echo "Servidor Correo (IPv4 + No-Chroot) Listo."
 tail -f /var/log/mail.log
