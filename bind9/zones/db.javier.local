@@ -7,15 +7,17 @@ $TTL    604800
                          604800 )       ; Negative Cache TTL
 ;
 @       IN      NS      ns1.javier.local.
-@       IN      A       172.20.0.16      
+@       IN      NS      ns2.javier.local.
+
+@       IN      A       172.20.0.16
 
 ns1     IN      A       172.20.0.13    ; DNS
+ns2     IN      A       172.20.0.17    ; DNS-Slave
 tomcat  IN      A       172.20.0.14    ; Tomcat
 www     IN      A       172.20.0.15    ; Apache
 ldap    IN      A       172.20.0.16    ; LDAP
-ns2     IN      A       172.20.0.17    ; DNS-Slave
 mail    IN      A       172.20.0.18    ; Mail
 
 produccion  IN  CNAME   www
 pruebas     IN  CNAME   www
-@           IN  MX      10    mail.javier.local
+@           IN  MX      10    mail.javier.local.
