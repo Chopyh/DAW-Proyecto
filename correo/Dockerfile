@@ -1,9 +1,8 @@
-# --- correo/Dockerfile ---
 FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# 1. Instalar paquetes necesarios (incluyendo herramientas de red y librerias)
+# 1. Instalar paquetes (ASEGÚRATE DE QUE ESTÁ 'rsyslog' AQUÍ)
 RUN apt-get update && apt-get install -y \
     postfix \
     dovecot-imapd \
@@ -20,14 +19,12 @@ COPY main.cf /etc/postfix/main.cf
 COPY dovecot.conf /etc/dovecot/dovecot.conf
 COPY entrypoint.sh /entrypoint.sh
 
-# 3. Permisos
+# 3. Permisos y Usuarios
 RUN chmod +x /entrypoint.sh
-
-# 4. Usuarios
 RUN useradd -m -s /bin/bash alumno && echo "alumno:1234" | chpasswd
 RUN useradd -m -s /bin/bash profe && echo "profe:1234" | chpasswd
 
-# 5. FIX CRÍTICO: Desactivar CHROOT permanentemente en la imagen
+# 4. FIX: Postfix sin jaula
 RUN postconf -F '*/*/chroot = n'
 
 EXPOSE 25 110 143
