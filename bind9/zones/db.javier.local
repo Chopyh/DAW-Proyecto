@@ -13,6 +13,9 @@ ns1     IN      A       172.20.0.13    ; DNS
 tomcat  IN      A       172.20.0.14    ; Tomcat
 www     IN      A       172.20.0.15    ; Apache
 ldap    IN      A       172.20.0.16    ; LDAP
+ns2     IN      A       172.20.0.17    ; DNS-Slave
+mail    IN      A       172.20.0.18    ; Mail
 
 produccion  IN  CNAME   www
 pruebas     IN  CNAME   www
+@           IN  MX      10    mail.javier.local

@@ -13,6 +13,22 @@ services:
       - ./bind9/conf:/etc/bind
       - ./bind9/zones:/var/lib/bind
 
+  dns-slave:
+    image: ubuntu/bind9
+    container_name: dns_slave_javier
+    user: root
+    networks:
+      red_daw:
+        ipv4_address: 172.20.0.17
+    ports:
+      - "5353:53/tcp"
+      - "5353:53/udp"
+    volumes:
+      - ./bind9-slave/conf:/etc/bind
+      - ./bind9-slave/zones:/var/lib/bind
+    depends_on:
+      - dns
+
   tomcat:
     image: tomcat:9.0
     container_name: tomcat_javier
@@ -45,21 +61,36 @@ services:
     dns:
       - 172.20.0.13
 
-  # ldap:
-  #   image: osixia/openldap:latest
-  #   container_name: ldap_javier
-  #   environment:
-  #     LDAP_ORGANISATION: "EduTech Solutions"
-  #     LDAP_DOMAIN: "javier.local"
-  #     LDAP_ADMIN_PASSWORD: "admin"
-  #   networks:
-  #     red_daw:
-  #       ipv4_address: 172.20.0.16
-  #   ports:
-  #     - "389:389"
-  #     - "636:636"
-  #   dns:
-  #     - 172.20.0.13
+  mail:
+    build: ./correo
+    container_name: mail_javier
+    hostname: mail.javier.local
+    domainname: javier.local
+    networks:
+      red_daw:
+        ipv4_address: 172.20.0.18
+    ports:
+      - "25:25"
+      - "110:110"
+      - "143:143"
+    dns:
+      - 172.20.0.13
+
+# ldap:
+#   image: osixia/openldap:latest
+#   container_name: ldap_javier
+#   environment:
+#     LDAP_ORGANISATION: "EduTech Solutions"
+#     LDAP_DOMAIN: "javier.local"
+#     LDAP_ADMIN_PASSWORD: "admin"
+#   networks:
+#     red_daw:
+#       ipv4_address: 172.20.0.16
+#   ports:
+#     - "389:389"
+#     - "636:636"
+#   dns:
+#     - 172.20.0.13
 
 networks:
   red_daw:

@@ -1,0 +1,22 @@
+# Nombre del servidor y dominio
+myhostname = mail.javier.local
+mydomain = javier.local
+myorigin = $mydomain
+
+# Redes permitidas (Tu red Docker)
+mynetworks = 127.0.0.0/8 172.20.0.0/16
+inet_interfaces = all
+inet_protocols = ipv4
+
+# Destino de los correos
+mydestination = $myhostname, localhost.$mydomain, localhost, $mydomain
+
+# Formato de buzón (IMPORTANTE para Dovecot)
+home_mailbox = Maildir/
+
+# Desactivar restricciones para facilitar pruebas internas
+smtpd_banner = $myhostname ESMTP
+biff = no
+append_dot_mydomain = no
+readme_directory = no
+compatibility_level = 2
