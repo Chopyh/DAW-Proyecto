@@ -21,8 +21,8 @@ COPY entrypoint.sh /entrypoint.sh
 
 # 3. Permisos y Usuarios
 RUN chmod +x /entrypoint.sh
-RUN useradd -m -s /bin/bash alumno && echo "alumno:1234" | chpasswd
-RUN useradd -m -s /bin/bash profe && echo "profe:1234" | chpasswd
+RUN useradd -m -s /bin/bash alumno && echo "javier:1234" | chpasswd
+RUN useradd -m -s /bin/bash profe && echo "chopy:1234" | chpasswd
 
 # 4. FIX: Postfix sin jaula
 RUN postconf -F '*/*/chroot = n'
