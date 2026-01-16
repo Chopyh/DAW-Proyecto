@@ -2,35 +2,46 @@ FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# 1. Instalar paquetes (Asegurando rsyslog)
+# 1. Instalar paquetes (Incluyendo rsyslog y herramientas de red)
 RUN apt-get update && apt-get install -y \
     postfix \
     dovecot-imapd \
     dovecot-pop3d \
+    rsyslog \
     iputils-ping \
     dnsutils \
     netcat \
     nano \
-    rsyslog \
     && rm -rf /var/lib/apt/lists/*
 
-# 2. Copiar configuraciones
+# 2. Copiar archivos de configuración
 COPY main.cf /etc/postfix/main.cf
 COPY dovecot.conf /etc/dovecot/dovecot.conf
 COPY entrypoint.sh /entrypoint.sh
 
-# 3. Permisos script
+# 3. Permisos y Usuarios
 RUN chmod +x /entrypoint.sh
 
-# 4. USUARIOS NUEVOS (Javier y Chopy)
+# Crear usuarios (javier:root y chopy:example)
 RUN useradd -m -s /bin/bash javier && echo "javier:root" | chpasswd
 RUN useradd -m -s /bin/bash chopy && echo "chopy:example" | chpasswd
 
-# 5. FIX LOGS: Desactivar lectura del kernel (imklog) porque falla en Docker
+# --- PARCHES DE ARREGLO (FIXES) ---
+
+# FIX 1: Logs. Desactivar módulo imklog que falla en Docker
 RUN sed -i '/imklog/s/^/#/' /etc/rsyslog.conf
 
-# 6. FIX POSTFIX: Desactivar jaula chroot
+# FIX 2: Postfix. Desactivar Jaula Chroot para evitar errores de DNS
 RUN postconf -F '*/*/chroot = n'
+
+# FIX 3: Alias. Configurar y generar la base de datos de alias (.db)
+# Esto evita el error "status=deferred (alias database unavailable)"
+RUN touch /etc/aliases
+RUN postconf -e 'alias_maps = hash:/etc/aliases'
+RUN postconf -e 'alias_database = hash:/etc/aliases'
+RUN newaliases
+
+# ----------------------------------
 
 EXPOSE 25 110 143
 

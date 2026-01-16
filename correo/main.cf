@@ -1,21 +1,28 @@
-# Nombre del servidor y dominio
+# Identidad
 myhostname = mail.javier.local
 mydomain = javier.local
 myorigin = $mydomain
 
-# Redes permitidas (Tu red Docker)
-mynetworks = 127.0.0.0/8 172.20.0.0/16
+# Red (Forzar IPv4 para evitar problemas en Docker)
 inet_interfaces = all
 inet_protocols = ipv4
+mynetworks = 127.0.0.0/8 172.20.0.0/16
 
-# Destino de los correos
+# Destino
 mydestination = $myhostname, localhost.$mydomain, localhost, $mydomain
 
-# Formato de buzón (IMPORTANTE para Dovecot)
+# Buzones
 home_mailbox = Maildir/
+
+# Desactivar comprobaciones estrictas de usuarios locales
+local_recipient_maps =
 luser_relay = javier
 
-# Desactivar restricciones para facilitar pruebas internas
+# Configuración Alias (Ya definida en Dockerfile, pero se refuerza aquí)
+alias_maps = hash:/etc/aliases
+alias_database = hash:/etc/aliases
+
+# Otros
 smtpd_banner = $myhostname ESMTP
 biff = no
 append_dot_mydomain = no
