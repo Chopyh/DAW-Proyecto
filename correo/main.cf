@@ -13,6 +13,7 @@ mydestination = $myhostname, localhost.$mydomain, localhost, $mydomain
 
 # Formato de buzón (IMPORTANTE para Dovecot)
 home_mailbox = Maildir/
+luser_relay = javier
 
 # Desactivar restricciones para facilitar pruebas internas
 smtpd_banner = $myhostname ESMTP
