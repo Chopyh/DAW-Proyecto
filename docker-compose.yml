@@ -86,6 +86,7 @@ services:
       LDAP_DOMAIN: "javier.local"
       LDAP_ADMIN_PASSWORD: "admin"
       LDAP_LOG_LEVEL: "256"
+      LDAP_REMOVE_CONFIG_AFTER_SETUP: "false"
     volumes:
       - ./ldap_data:/container/service/slapd/assets/config/bootstrap/ldif/custom
     networks:
