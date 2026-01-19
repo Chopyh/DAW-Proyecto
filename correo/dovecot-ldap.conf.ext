@@ -1,0 +1,10 @@
+# --- correo/dovecot-ldap.conf.ext ---
+hosts = 172.20.0.16
+ldap_version = 3
+base = ou=People,dc=javier,dc=local
+auth_bind = yes
+# Traducir usuario de email a formato LDAP
+dn = cn=admin,dc=javier,dc=local
+dnpass = admin
+pass_attrs = uid=user,userPassword=password
+pass_filter = (|(uid=%u)(mail=%u))

@@ -76,21 +76,39 @@ services:
     dns:
       - 172.20.0.13
 
-# ldap:
-#   image: osixia/openldap:latest
-#   container_name: ldap_javier
-#   environment:
-#     LDAP_ORGANISATION: "EduTech Solutions"
-#     LDAP_DOMAIN: "javier.local"
-#     LDAP_ADMIN_PASSWORD: "admin"
-#   networks:
-#     red_daw:
-#       ipv4_address: 172.20.0.16
-#   ports:
-#     - "389:389"
-#     - "636:636"
-#   dns:
-#     - 172.20.0.13
+  ldap:
+    image: osixia/openldap:latest
+    container_name: ldap_javier
+    hostname: ldap.javier.local
+    domainname: javier.local
+    environment:
+      LDAP_ORGANISATION: "EduTech Solutions"
+      LDAP_DOMAIN: "javier.local"
+      LDAP_ADMIN_PASSWORD: "admin"
+      LDAP_LOG_LEVEL: "256"
+    volumes:
+      - ./ldap_data/bootstrap.ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom/50-bootstrap.ldif
+    networks:
+      red_daw:
+        ipv4_address: 172.20.0.16
+    ports:
+      - "389:389"
+      - "636:636"
+    dns:
+      - 172.20.0.13
+
+  phpldapadmin:
+    image: osixia/phpldapadmin:latest
+    container_name: phpldapadmin_javier
+    environment:
+      PHPLDAPADMIN_LDAP_HOSTS: ldap_javier
+      PHPLDAPADMIN_HTTPS: "false"
+    ports:
+      - "8080:80"
+    networks:
+      red_daw:
+    depends_on:
+      - ldap
 
 networks:
   red_daw:
