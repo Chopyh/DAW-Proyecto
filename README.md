@@ -1,391 +1,190 @@
-# DAW-Proyecto: Infraestructura EduTech Solutions
+# Proyecto de Infraestructura DAW: EduTech Solutions
 
-## Descripción General
+Este repositorio contiene la configuración completa de una infraestructura de red simulada utilizando Docker Compose. El proyecto despliega una serie de servicios interconectados que simulan un entorno empresarial real, incluyendo DNS, Servidor Web (HTTPS), Servidor de Aplicaciones, Correo y Directorio LDAP.
 
-Este proyecto implementa una infraestructura completa de servicios de red utilizando **Docker** y **Docker Compose**. Proporciona una solución educativa integrada llamada **EduTech Solutions** con múltiples servidores interconectados que funcionan de manera coordinada.
+## Diagrama de Arquitectura y Red
 
-La infraestructura está diseñada para demostrar conceptos clave de administración de sistemas, redes y servicios web en un entorno containerizado.
+La red utilizada es **172.20.0.0/16** (`red_daw`).
 
----
+<img src="./res/main_diagram.png" alt="Diagrama de Arquitectura" width="600">
 
-## Arquitectura del Proyecto
 
-La solución está compuesta por 4 servicios principales que se comunican a través de una red personalizada:
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    Red DAW (172.20.0.0/16)                  │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐       │
-│  │   DNS/BIND9  │  │   Apache     │  │   Tomcat     │       │
-│  │ 172.20.0.13  │  │ 172.20.0.15  │  │ 172.20.0.14  │       │
-│  └──────────────┘  └──────────────┘  └──────────────┘       │
-│                           │                                 │
-│                    ┌──────────────┐                         │
-│                    │  OpenLDAP    │                         │
-│                    │ 172.20.0.16  │                         │
-│                    └──────────────┘                         │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
-```
+## Servicios Desplegados
 
-### Servicios Implementados
-
-#### 1. **DNS/BIND9** (172.20.0.13)
-- **Imagen:** `ubuntu/bind9`
-- **Contenedor:** `dns_javier`
-- **Puertos:** 
-  - 53/TCP (DNS)
-  - 53/UDP (DNS)
-- **Función:** Servidor de nombres autoritario para la zona `javier.local`
-- **Características:**
-  - Gestión de registros A, CNAME y PTR
-  - Resolución inversa (reverse lookup) para la red 172.20.0.0/24
-  - Forwarders configurados hacia Google DNS (8.8.8.8 y 8.8.4.4)
-  - Permite consultas recursivas desde cualquier cliente
-
-#### 2. **Apache HTTP Server** (172.20.0.15)
-- **Imagen:** Custom (construida desde `httpd:2.4`)
-- **Contenedor:** `apache_javier`
-- **Puertos:**
-  - 80/TCP (HTTP - redirige a HTTPS)
-  - 443/TCP (HTTPS)
-- **Función:** Servidor web principal con soporte SSL/TLS
-- **Características:**
-  - Certificados SSL autofirmados
-  - Configuración de múltiples virtual hosts
-  - Proxy inverso hacia Tomcat
-
-#### 3. **Apache Tomcat** (172.20.0.14)
-- **Imagen:** `tomcat:9.0`
-- **Contenedor:** `tomcat_javier`
-- **Puertos:** 8080 (interno, accesible a través de Apache)
-- **Función:** Servidor de aplicaciones Java
-- **Características:**
-  - Soporte para JSP y aplicaciones Java
-  - Página de bienvenida personalizada con información del servidor
-
-#### 4. **OpenLDAP** (172.20.0.16)
-- **Imagen:** `osixia/openldap:latest`
-- **Contenedor:** `ldap_javier`
-- **Puertos:**
-  - 389/TCP (LDAP sin encriptación)
-  - 636/TCP (LDAPS - LDAP seguro)
-- **Función:** Servicio de directorio LDAP para autenticación centralizada
-- **Configuración:**
-  - Organización: "EduTech Solutions"
-  - Dominio: "javier.local"
-  - Contraseña admin: "admin"
+| Servicio         | Contenedor            | IP Asignada | Puertos Expuestos | Descripción Configuración                                                                                   |
+| ---------------- | --------------------- | ----------- | ----------------- | ----------------------------------------------------------------------------------------------------------- |
+| **DNS Master**   | `dns_javier`          | 172.20.0.13 | 53 (UDP/TCP)      | [Ver DNS README](bind9/README.md). Maestro de zona `javier.local` y resolución inversa. Forwarder a Google. |
+| **DNS Slave**    | `dns_slave_javier`    | 172.20.0.17 | 5454:53           | [Ver Slave README](bind9-slave/README.md). Réplica automática del maestro.                                  |
+| **Apache**       | `apache_javier`       | 172.20.0.15 | 80, 443           | [Ver Apache README](apache/README.md). Proxy inverso SSL, Hosting Virtual, Logs centralizados.              |
+| **Tomcat**       | `tomcat_javier`       | 172.20.0.14 | -                 | [Ver Tomcat README](tomcat/README.md). App Server Java. Accesible solo vía Apache.                          |
+| **LDAP**         | `ldap_javier`         | 172.20.0.16 | 389, 636          | Backend de autenticación centralizada. [Ver LDAP Data](ldap_data/README.md).                                |
+| **Mail**         | `mail_javier`         | 172.20.0.18 | 25, 110, 143      | [Ver Mail README](correo/README.md). Servidor SMTP/IMAP integrado con LDAP.                                 |
+| **phpLDAPadmin** | `phpldapadmin_javier` | Dinámica    | 8080:80           | Interfaz web para gestión visual del directorio LDAP.                                                       |
 
 ---
 
-## Estructura de Directorios
+## Detalles de Configuración DNS
 
-```
-DAW-Proyecto/
-├── docker-compose.yml          # Configuración de servicios Docker
-├── README.md                   # Este archivo
-│
-├── apache/                     # Servidor web Apache
-│   ├── Dockerfile              # Construcción de imagen personalizada
-│   ├── conf/                   # Configuraciones de Apache
-│   │   ├── httpd.conf          # Configuración principal
-│   │   ├── server.crt          # Certificado SSL (autofirmado)
-│   │   ├── server.key          # Clave privada SSL
-│   │   └── extra/
-│   │       ├── edutech.conf    # Incluye los virtual hosts
-│   │       └── vhosts/         # Un virtual host por archivo
-│   │           ├── 00-redirect.conf
-│   │           ├── 10-produccion.conf
-│   │           ├── 20-pruebas.conf
-│   │           └── 30-tomcat.conf
-│   ├── logs/                   # Registros de acceso y errores
-│   └── www/                    # Contenido web
-│       ├── produccion/         # Sitio de producción
-│       │   └── index.html
-│       └── pruebas/            # Sitio de pruebas
-│           └── index.html
-│
-├── bind9/                      # Servidor DNS
-│   ├── conf/
-│   │   └── named.conf          # Configuración de BIND9
-│   └── zones/                  # Archivos de zona DNS
-│       ├── db.javier.local     # Zona forward
-│       └── db.172.20.0         # Zona reverse
-│
-└── tomcat/                     # Servidor de aplicaciones
-    └── webapps/
-        └── ROOT/
-            └── index.jsp       # Página de inicio (JSP)
-```
+### Zona Directa: javier.local
+
+El servidor DNS maestro (`dns_javier` - 172.20.0.13) gestiona la zona `javier.local` con los siguientes registros:
+
+| Nombre de Host            | Tipo              | IP Asignada       | Descripción                      |
+| ------------------------- | ----------------- | ----------------- | -------------------------------- |
+| `ns1.javier.local`        | A                 | 172.20.0.13       | Servidor DNS Maestro             |
+| `ns2.javier.local`        | A                 | 172.20.0.17       | Servidor DNS Esclavo             |
+| `tomcat.javier.local`     | A                 | 172.20.0.14       | Servidor de aplicaciones Tomcat  |
+| `www.javier.local`        | A                 | 172.20.0.15       | Servidor Web Apache              |
+| `ldap.javier.local`       | A                 | 172.20.0.16       | Servidor LDAP                    |
+| `mail.javier.local`       | A                 | 172.20.0.18       | Servidor de correo               |
+| `produccion.javier.local` | CNAME             | www.javier.local  | Alias para entorno de producción |
+| `pruebas.javier.local`    | CNAME             | www.javier.local  | Alias para entorno de pruebas    |
+| `@`                       | MX (Prioridad 10) | mail.javier.local | Registro de correo electrónico   |
+
+### Zona Inversa: 0.20.172.in-addr.arpa
+
+Resolución inversa para la red 172.20.0.0/16:
+
+| IP          | Registro PTR                           |
+| ----------- | -------------------------------------- |
+| 172.20.0.13 | ns1.javier.local                       |
+| 172.20.0.14 | tomcat-server.javier.local             |
+| 172.20.0.15 | apache.javier.local / www.javier.local |
+| 172.20.0.16 | ldap-server.javier.local               |
+| 172.20.0.17 | ns2.javier.local                       |
+| 172.20.0.18 | mail.javier.local                      |
+
+### Configuración de Transferencia de Zona
+
+- **DNS Slave** (172.20.0.17) realiza transferencia automática desde el maestro
+- **Forwarders**: Consultas externas se reenvían a 8.8.8.8 (Google DNS)
 
 ---
 
-## Configuraciones Detalladas
+## Configuración de VirtualHosts Apache
 
-### DNS (BIND9)
+El servidor Apache (`apache_javier` - 172.20.0.15) está configurado con SSL/TLS y tres VirtualHosts:
 
-#### Archivo de zona forward: `bind9/zones/db.javier.local`
+### 1. VirtualHost Producción
+- **Dominio**: `produccion.javier.local`
+- **Puerto**: 443 (HTTPS)
+- **DocumentRoot**: `/usr/local/apache2/htdocs/produccion`
+- **SSL**: Habilitado con certificado autofirmado
+  - Certificado: `/usr/local/apache2/conf/ssl/server.crt`
+  - Clave privada: `/usr/local/apache2/conf/ssl/server.key`
+- **Configuración de Directorio**:
+  - `AllowOverride All` - Permite uso de .htaccess
+  - `Options Indexes FollowSymLinks` - Listado de directorios y enlaces simbólicos habilitados
+  - `Require all granted` - Acceso permitido sin restricciones
+- **Logs**:
+  - Error: `/usr/local/apache2/logs/produccion_error.log`
+  - Acceso: `/usr/local/apache2/logs/produccion_access.log` (formato combined)
 
-Define los registros A y CNAME para la zona:
-- **ns1.javier.local** → 172.20.0.13 (DNS server)
-- **tomcat.javier.local** → 172.20.0.14 (Tomcat)
-- **www.javier.local** → 172.20.0.15 (Apache)
-- **produccion.javier.local** → CNAME a www.javier.local
-- **pruebas.javier.local** → CNAME a www.javier.local
-- **ldap.javier.local** → 172.20.0.16 (LDAP server)
+### 2. VirtualHost Pruebas
+- **Dominio**: `pruebas.javier.local`
+- **Puerto**: 443 (HTTPS)
+- **DocumentRoot**: `/usr/local/apache2/htdocs/pruebas`
+- **SSL**: Habilitado con el mismo certificado autofirmado
+- **Configuración de Directorio**:
+  - `AllowOverride None` - No se permite configuración vía .htaccess
+  - `Options Indexes FollowSymLinks` - Listado y enlaces simbólicos habilitados
+  - `Require all granted` - Acceso sin restricciones
+- **Logs**:
+  - Error: `/usr/local/apache2/logs/pruebas_error.log`
+  - Acceso: `/usr/local/apache2/logs/pruebas_access.log` (formato common)
 
-#### Archivo de zona reverse: `bind9/zones/db.172.20.0`
+### 3. VirtualHost Tomcat (Proxy Inverso)
+- **Dominio**: `tomcat.javier.local`
+- **Puerto**: 443 (HTTPS)
+- **Tipo**: Proxy inverso hacia contenedor Tomcat
+- **SSL**: Habilitado (terminación SSL en Apache)
+- **Backend**: `http://tomcat:8080/`
+- **Configuración Proxy**:
+  - `ProxyRequests Off` - Proxy directo deshabilitado
+  - `ProxyPreserveHost On` - Mantiene el header Host original
+  - `ProxyPass` y `ProxyPassReverse` - Reenvío bidireccional a Tomcat
+- **Logs**:
+  - Error: `/usr/local/apache2/logs/tomcat_error.log`
+  - Acceso: `/usr/local/apache2/logs/tomcat_access.log` (formato combined)
 
-Configuración de resolución inversa (PTR records) para la red 172.20.0.0/24.
-
-### Apache HTTP Server
-
-#### Configuración principal: `apache/conf/httpd.conf`
-
-Incluye módulos clave:
-- MPM Event (multi-procesamiento)
-- Autenticación y autorización
-- SSL/TLS
-- Módulos de proxy
-
-#### Virtual Hosts: `apache/conf/extra/vhosts/*.conf` (incluidos desde `apache/conf/extra/edutech.conf`)
-
-Cada archivo contiene un único VirtualHost:
-
-- `00-redirect.conf` → Redirección HTTP a `https://pruebas.javier.local/`
-- `10-produccion.conf` → `produccion.javier.local`, SSL, AllowOverride All, logs dedicados
-- `20-pruebas.conf` → `pruebas.javier.local`, SSL, AllowOverride None, logs dedicados
-- `30-tomcat.conf` → Proxy inverso hacia Tomcat en `http://tomcat:8080/`
-- Logs: `tomcat_error.log` y `tomcat_access.log`
-
-### Tomcat
-
-El servidor Tomcat aloja una página JSP personalizada en `tomcat/webapps/ROOT/index.jsp` que muestra:
-- Nombre del servidor
-- Puerto de conexión
-- Versión de Tomcat
-- Información del servidor
-
-### OpenLDAP
-
-Configurado con:
-- Organización: EduTech Solutions
-- Dominio LDAP: javier.local
-- Puertos estándar LDAP (389) y LDAPS (636)
+### Redirección HTTP a HTTPS
+Todas las peticiones HTTP (puerto 80) son redirigidas automáticamente a HTTPS (puerto 443) mediante configuración en [00-redirect.conf](apache/conf/extra/vhosts/00-redirect.conf).
 
 ---
 
-## Cómo Ejecutar el Proyecto
+## Usuarios y Estructura LDAP
 
-### Requisitos Previos
+El directorio LDAP (`ldap_javier` - 172.20.0.16) utiliza el dominio base `dc=javier,dc=local` con la siguiente estructura organizativa:
 
-- **Docker** instalado y funcionando
-- **Docker Compose** instalado
-- Al menos 2GB de RAM disponible
-- Puertos 53, 80, 389, 443, 636 y 53/UDP disponibles
+### Estructura del Directorio
 
-### Pasos para Iniciar
+```
+dc=javier,dc=local
+├── ou=People          (Unidad organizativa para usuarios)
+└── ou=Groups          (Unidad organizativa para grupos)
+```
 
-1. **Clonar o descargar el repositorio:**
+### Usuarios Creados
+
+Se precargan dos usuarios en el sistema mediante [bootstrap.ldif](ldap_data/bootstrap.ldif):
+
+#### Usuario 1: Javier (Profesor)
+- **DN**: `cn=Javier,ou=People,dc=javier,dc=local`
+- **Clases de Objeto**: `inetOrgPerson`, `posixAccount`, `shadowAccount`
+- **Atributos**:
+  - `uid`: javier
+  - `cn`: Javier
+  - `sn`: Profe
+  - `uidNumber`: 10000
+  - `gidNumber`: 10000
+  - `homeDirectory`: /home/javier
+  - `mail`: javier@javier.local
+  - `userPassword`: root
+
+#### Usuario 2: Chopy (Alumno)
+- **DN**: `cn=Chopy,ou=People,dc=javier,dc=local`
+- **Clases de Objeto**: `inetOrgPerson`, `posixAccount`, `shadowAccount`
+- **Atributos**:
+  - `uid`: chopy
+  - `cn`: Chopy
+  - `sn`: Alumno
+  - `uidNumber`: 10001
+  - `gidNumber`: 10000
+  - `homeDirectory`: /home/chopy
+  - `mail`: chopy@javier.local
+  - `userPassword`: example
+
+### Acceso al Directorio LDAP
+
+- **Puerto LDAP**: 389 (sin cifrado)
+- **Puerto LDAPS**: 636 (con SSL/TLS)
+- **Interfaz Web**: phpLDAPadmin disponible en http://localhost:8080
+  - Usuario admin: `cn=admin,dc=javier,dc=local`
+- **Integración**: El servidor de correo utiliza estos usuarios para autenticación SMTP/IMAP
+
+---
+
+## Instrucciones de Inicio
+
+1. **Requisitos**: Docker y Docker Compose instalados.
+2. **Arrancar entorno**:
    ```bash
-   cd DAW-Proyecto
+   docker-compose up -d --build
    ```
-
-2. **Iniciar los servicios:**
-   ```bash
-   docker-compose up -d
-   ```
-   
-   El parámetro `-d` ejecuta los contenedores en segundo plano.
-
-3. **Verificar que todos los servicios estén corriendo:**
+3. **Verificación**:
    ```bash
    docker-compose ps
    ```
 
-### Comandos Útiles
+## Configuración de Cliente (Host)
 
-**Ver logs de un servicio específico:**
-```bash
-docker-compose logs -f [dns|apache|tomcat|ldap]
+Para acceder a los servicios por nombre de dominio desde tu máquina host sin usar un servidor DNS real, debes añadir entradas a tu archivo `hosts` (Windows: `C:\Windows\System32\drivers\etc\hosts`, Linux/Mac: `/etc/hosts`).
+
+```text
+127.0.0.1 produccion.javier.local
+127.0.0.1 pruebas.javier.local
+127.0.0.1 tomcat.javier.local
+127.0.0.1 mail.javier.local
 ```
-
-**Acceder a una terminal dentro de un contenedor:**
-```bash
-docker-compose exec [servicio] /bin/bash
-```
-
-**Detener todos los servicios:**
-```bash
-docker-compose down
-```
-
-**Detener y eliminar volúmenes (¡cuidado, elimina datos!):**
-```bash
-docker-compose down -v
-```
-
-**Reconstruir la imagen de Apache:**
-```bash
-docker-compose build apache
-```
-
----
-
-## Acceso a Servicios
-
-### Desde el Equipo Host
-
-Asume que has configurado las entradas DNS locales o usas las direcciones IP directamente.
-
-**Configuración de hosts recomendada** (archivo `C:\Windows\System32\drivers\etc\hosts` en Windows o `/etc/hosts` en Linux/Mac):
-```
-127.0.0.1       localhost
-172.20.0.13     ns1.javier.local
-172.20.0.14     tomcat.javier.local
-172.20.0.15     www.javier.local produccion.javier.local pruebas.javier.local
-172.20.0.16     ldap.javier.local
-```
-
-### Servicios Disponibles
-
-| Servicio        | URL                             | Descripción                              |
-| --------------- | ------------------------------- | ---------------------------------------- |
-| Producción      | https://produccion.javier.local | Sitio en producción (AllowOverride: All) |
-| Pruebas         | https://pruebas.javier.local    | Sitio de pruebas (AllowOverride: None)   |
-| Tomcat          | https://tomcat.javier.local     | Aplicación Tomcat via proxy              |
-| HTTP (redirige) | http://javier.local             | Se redirige a pruebas.javier.local       |
-| LDAP            | ldap://ldap.javier.local:389    | Servidor de directorio                   |
-| DNS             | 172.20.0.13:53                  | Servidor de nombres                      |
-
-**Nota:** Los certificados SSL son autofirmados, por lo que el navegador mostrará advertencias de seguridad.
-
----
-
-## Flujo de Comunicación
-
-1. **Resolución DNS:**
-   - Las consultas a `*.javier.local` se resuelven mediante el servidor BIND9
-   - El servidor DNS retorna las IPs correspondientes
-
-2. **Acceso a sitios web:**
-   - Las solicitudes HTTP (puerto 80) se redirigen a HTTPS
-   - Apache escucha en HTTPS (puerto 443)
-   - Según el host solicitado:
-     - **produccion.javier.local** → Sirve contenido de `www/produccion/`
-     - **pruebas.javier.local** → Sirve contenido de `www/pruebas/`
-     - **tomcat.javier.local** → Proxea a Tomcat en `http://tomcat:8080/`
-
-3. **Autenticación LDAP:**
-   - OpenLDAP proporciona servicios de directorio
-   - Puede ser integrado con Apache para autenticación de usuarios
-
----
-
-## Certificados SSL
-
-Los certificados SSL incluidos son **autofirmados** y generados para propósitos educativos/de desarrollo.
-
-**Ubicación:**
-- Certificado: `apache/conf/server.crt`
-- Clave privada: `apache/conf/server.key`
-
-Para generar nuevos certificados (si es necesario):
-```bash
-openssl req -x509 -newkey rsa:4096 -keyout server.key -out server.crt -days 365 -nodes
-```
-
----
-
-## Troubleshooting
-
-### Los servicios no inician
-- Verifica que los puertos no estén en uso: `netstat -an`
-- Revisa los logs: `docker-compose logs`
-
-### No puedo resolver `javier.local`
-- Asegúrate de que el DNS está usando 172.20.0.13
-- Verifica la configuración en tu archivo `hosts`
-- Desde dentro de la red Docker, los contenedores pueden usar directamente el nombre del servicio
-
-### El certificado SSL muestra error
-- Es normal con certificados autofirmados
-- Acepta la excepción en el navegador o usa `curl -k`
-
-### Tomcat no es accesible vía proxy
-- Verifica que Apache está corriendo: `docker-compose ps`
-- Comprueba que Tomcat está escuchando: `docker-compose exec tomcat curl http://localhost:8080/`
-- Revisa los logs de Apache: `docker-compose logs apache`
-
----
-
-## Notas de Desarrollo
-
-### Añadir nuevos contenidos web
-- Coloca archivos HTML en `apache/www/produccion/` o `apache/www/pruebas/`
-- Los cambios son inmediatos (el volumen está montado)
-
-### Modificar configuraciones de Apache
-- Edita `apache/conf/httpd.conf` o los ficheros en `apache/conf/extra/vhosts/` (se cargan desde `apache/conf/extra/edutech.conf`)
-- Recarga Apache sin reiniciar: `docker-compose exec apache apachectl graceful`
-
-### Agregar nuevos usuarios LDAP
-- Accede al contenedor LDAP: `docker-compose exec ldap /bin/bash`
-- Usa herramientas LDAP como `ldapadd` para agregar entradas
-
-### Cambiar registros DNS
-- Edita los archivos en `bind9/zones/`
-- Incrementa el número de serie en el registro SOA
-- Recarga BIND: `docker-compose exec dns rndc reload`
-
----
-
-## Información Técnica
-
-### Versiones de Servicios
-- **Apache HTTP Server:** 2.4
-- **Apache Tomcat:** 9.0
-- **BIND9:** Última versión (ubuntu/bind9)
-- **OpenLDAP:** Última versión disponible
-
-### Recursos de Red
-- **Subred:** 172.20.0.0/16
-- **Driver de red:** bridge
-- **DNS interno:** 172.20.0.13 (automático para todos los contenedores)
-
-### Montajes de Volúmenes
-Todos los archivos de configuración están montados como volúmenes, permitiendo:
-- Edición directa en el host
-- Cambios inmediatos sin reconstruir imágenes
-- Persistencia de datos de configuración
-
----
-
-## Licencia y Créditos
-
-Este proyecto fue desarrollado como parte del módulo **DAW (Desarrollo de Aplicaciones Web)**.
-
-Está diseñado con fines educativos para enseñar conceptos de:
-- Infraestructura de servicios
-- Configuración de DNS
-- Servidores web y de aplicaciones
-- Directorios LDAP
-- Docker y containerización
-- Redes y comunicación entre contenedores
-
----
-
-## Soporte y Contacto
-
-Para reportar problemas o sugerencias, consulta la documentación oficial de:
-- [Apache HTTP Server](https://httpd.apache.org/)
-- [BIND9 DNS](https://www.isc.org/bind/)
-- [Apache Tomcat](https://tomcat.apache.org/)
-- [OpenLDAP](https://www.openldap.org/)
-- [Docker Documentation](https://docs.docker.com/)
-
----
-
-**Última actualización:** 13 de enero de 2026
+*Nota: Se usa 127.0.0.1 porque los puertos de Apache (443) y Mail están mapeados a localhost.*
