@@ -51,6 +51,7 @@ services:
       - ./apache/conf/httpd.conf:/usr/local/apache2/conf/httpd.conf
       
       - ./apache/conf/extra/edutech.conf:/usr/local/apache2/conf/extra/httpd-vhosts.conf
+      - ./apache/conf/extra/vhosts:/usr/local/apache2/conf/extra/vhosts
       - ./apache/www:/usr/local/apache2/htdocs
       - ./apache/logs:/usr/local/apache2/logs
       - ./apache/conf/server.crt:/usr/local/apache2/conf/ssl/server.crt

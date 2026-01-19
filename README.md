@@ -94,7 +94,12 @@ DAW-Proyecto/
 │   │   ├── server.crt          # Certificado SSL (autofirmado)
 │   │   ├── server.key          # Clave privada SSL
 │   │   └── extra/
-│   │       └── edutech.conf    # Configuración de virtual hosts
+│   │       ├── edutech.conf    # Incluye los virtual hosts
+│   │       └── vhosts/         # Un virtual host por archivo
+│   │           ├── 00-redirect.conf
+│   │           ├── 10-produccion.conf
+│   │           ├── 20-pruebas.conf
+│   │           └── 30-tomcat.conf
 │   ├── logs/                   # Registros de acceso y errores
 │   └── www/                    # Contenido web
 │       ├── produccion/         # Sitio de producción
@@ -145,29 +150,14 @@ Incluye módulos clave:
 - SSL/TLS
 - Módulos de proxy
 
-#### Virtual Hosts: `apache/conf/extra/edutech.conf`
+#### Virtual Hosts: `apache/conf/extra/vhosts/*.conf` (incluidos desde `apache/conf/extra/edutech.conf`)
 
-Se configuran 3 virtual hosts HTTPS:
+Cada archivo contiene un único VirtualHost:
 
-**1. HTTP Redirect (Puerto 80)**
-- Todos los accesos HTTP se redirigen permanentemente a `pruebas.javier.local`
-
-**2. Sitio de Producción (`produccion.javier.local`)**
-- DocumentRoot: `/usr/local/apache2/htdocs/produccion`
-- SSL habilitado
-- AllowOverride: All (permite .htaccess)
-- Logs: `produccion_error.log` y `produccion_access.log`
-
-**3. Sitio de Pruebas (`pruebas.javier.local`)**
-- DocumentRoot: `/usr/local/apache2/htdocs/pruebas`
-- SSL habilitado
-- AllowOverride: None (no permite .htaccess)
-- Logs: `pruebas_error.log` y `pruebas_access.log`
-
-**4. Proxy Tomcat (`tomcat.javier.local`)**
-- Actúa como proxy inverso hacia Tomcat
-- Redirige todas las solicitudes a `http://tomcat:8080/`
-- Preserva los headers de host originales
+- `00-redirect.conf` → Redirección HTTP a `https://pruebas.javier.local/`
+- `10-produccion.conf` → `produccion.javier.local`, SSL, AllowOverride All, logs dedicados
+- `20-pruebas.conf` → `pruebas.javier.local`, SSL, AllowOverride None, logs dedicados
+- `30-tomcat.conf` → Proxy inverso hacia Tomcat en `http://tomcat:8080/`
 - Logs: `tomcat_error.log` y `tomcat_access.log`
 
 ### Tomcat
@@ -338,7 +328,7 @@ openssl req -x509 -newkey rsa:4096 -keyout server.key -out server.crt -days 365 
 - Los cambios son inmediatos (el volumen está montado)
 
 ### Modificar configuraciones de Apache
-- Edita `apache/conf/httpd.conf` o `apache/conf/extra/edutech.conf`
+- Edita `apache/conf/httpd.conf` o los ficheros en `apache/conf/extra/vhosts/` (se cargan desde `apache/conf/extra/edutech.conf`)
 - Recarga Apache sin reiniciar: `docker-compose exec apache apachectl graceful`
 
 ### Agregar nuevos usuarios LDAP
