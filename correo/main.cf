@@ -9,7 +9,7 @@ inet_protocols = ipv4
 mynetworks = 127.0.0.0/8 172.20.0.0/16
 
 # Destino
-mydestination = $myhostname, localhost.$mydomain, localhost, $mydomain
+mydestination = localhost
 
 # Buzones
 home_mailbox = Maildir/
@@ -28,3 +28,10 @@ biff = no
 append_dot_mydomain = no
 readme_directory = no
 compatibility_level = 2
+
+virtual_mailbox_domains = javier.local
+virtual_mailbox_base = /var/mail/vhosts
+virtual_mailbox_maps = ldap:/etc/postfix/ldap-users.cf
+virtual_minimum_uid = 100
+virtual_uid_maps = static:5000
+virtual_gid_maps = static:5000

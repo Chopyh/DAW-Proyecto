@@ -1,12 +1,14 @@
+# --- correo/Dockerfile ---
 FROM ubuntu:22.04
-
 ENV DEBIAN_FRONTEND=noninteractive
 
-# 1. Instalar paquetes (Incluyendo rsyslog y herramientas de red)
+# 1. Instalar paquetes (AÑADIDOS DRIVERS LDAP)
 RUN apt-get update && apt-get install -y \
     postfix \
+    postfix-ldap \
     dovecot-imapd \
     dovecot-pop3d \
+    dovecot-ldap \
     rsyslog \
     iputils-ping \
     dnsutils \
@@ -14,35 +16,23 @@ RUN apt-get update && apt-get install -y \
     nano \
     && rm -rf /var/lib/apt/lists/*
 
-# 2. Copiar archivos de configuración
+# 2. Config y Scripts
 COPY main.cf /etc/postfix/main.cf
+COPY ldap-users.cf /etc/postfix/ldap-users.cf
 COPY dovecot.conf /etc/dovecot/dovecot.conf
+COPY dovecot-ldap.conf.ext /etc/dovecot/dovecot-ldap.conf.ext
 COPY entrypoint.sh /entrypoint.sh
-
-# 3. Permisos y Usuarios
 RUN chmod +x /entrypoint.sh
 
-# Crear usuarios (javier:root y chopy:example)
-RUN useradd -m -s /bin/bash javier && echo "javier:root" | chpasswd
-RUN useradd -m -s /bin/bash chopy && echo "chopy:example" | chpasswd
+# 3. USUARIO VIRTUAL (El dueño de los buzones)
+# UID 5000 es el estándar para usuario de correo virtual
+RUN groupadd -g 5000 vmail
+RUN useradd -u 5000 -g vmail -s /usr/sbin/nologin -d /var/mail/vhosts -m vmail
 
-# --- PARCHES DE ARREGLO (FIXES) ---
-
-# FIX 1: Logs. Desactivar módulo imklog que falla en Docker
+# 4. FIXES (Logs y Chroot igual que antes)
 RUN sed -i '/imklog/s/^/#/' /etc/rsyslog.conf
-
-# FIX 2: Postfix. Desactivar Jaula Chroot para evitar errores de DNS
 RUN postconf -F '*/*/chroot = n'
-
-# FIX 3: Alias. Configurar y generar la base de datos de alias (.db)
-# Esto evita el error "status=deferred (alias database unavailable)"
-RUN touch /etc/aliases
-RUN postconf -e 'alias_maps = hash:/etc/aliases'
-RUN postconf -e 'alias_database = hash:/etc/aliases'
-RUN newaliases
-
-# ----------------------------------
+RUN touch /etc/aliases && newaliases
 
 EXPOSE 25 110 143
-
 CMD ["/entrypoint.sh"]

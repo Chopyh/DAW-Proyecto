@@ -1,0 +1,12 @@
+server_host = 172.20.0.16
+search_base = ou=People,dc=javier,dc=local
+version = 3
+
+bind = yes
+bind_dn = cn=admin,dc=javier,dc=local
+bind_pw = admin
+
+query_filter = (|(uid=%s)(mail=%s))
+result_attribute = uid
+result_format = %s/Maildir/
+debuglevel = 0

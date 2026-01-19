@@ -1,0 +1,33 @@
+dn: ou=People,dc=javier,dc=local
+objectClass: organizationalUnit
+ou: People
+
+dn: ou=Groups,dc=javier,dc=local
+objectClass: organizationalUnit
+ou: Groups
+
+dn: cn=Javier,ou=People,dc=javier,dc=local
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: shadowAccount
+cn: Javier
+sn: Profe
+uid: javier
+uidNumber: 10000
+gidNumber: 10000
+homeDirectory: /home/javier
+userPassword: root
+mail: javier@javier.local
+
+dn: cn=Chopy,ou=People,dc=javier,dc=local
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: shadowAccount
+cn: Chopy
+sn: Alumno
+uid: chopy
+uidNumber: 10001
+gidNumber: 10000
+homeDirectory: /home/chopy
+userPassword: example
+mail: chopy@javier.local
