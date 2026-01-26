@@ -1,6 +1,6 @@
 hosts = 172.20.0.16
 ldap_version = 3
-base = ou=People,dc=javier,dc=local
+base = ou=Usuarios,dc=javier,dc=local
 
 dn = cn=admin,dc=javier,dc=local
 dnpass = admin

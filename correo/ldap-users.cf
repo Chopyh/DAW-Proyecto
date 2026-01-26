@@ -1,5 +1,5 @@
 server_host = 172.20.0.16
-search_base = ou=People,dc=javier,dc=local
+search_base = ou=Usuarios,dc=javier,dc=local
 version = 3
 
 bind = yes

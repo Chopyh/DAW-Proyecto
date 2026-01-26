@@ -1,33 +1,112 @@
-dn: ou=People,dc=javier,dc=local
+# Unidad Organizativa: Usuarios
+dn: ou=Usuarios,dc=javier,dc=local
 objectClass: organizationalUnit
-ou: People
+ou: Usuarios
 
+# Unidad Organizativa: Groups
 dn: ou=Groups,dc=javier,dc=local
 objectClass: organizationalUnit
 ou: Groups
 
-dn: cn=Javier,ou=People,dc=javier,dc=local
+# Grupo: administradores (GID 5001)
+dn: cn=administradores,ou=Groups,dc=javier,dc=local
+objectClass: posixGroup
+cn: administradores
+gidNumber: 5001
+
+# Grupo: profesores (GID 5002)
+dn: cn=profesores,ou=Groups,dc=javier,dc=local
+objectClass: posixGroup
+cn: profesores
+gidNumber: 5002
+
+# Grupo: alumnos (GID 5003)
+dn: cn=alumnos,ou=Groups,dc=javier,dc=local
+objectClass: posixGroup
+cn: alumnos
+gidNumber: 5003
+
+# Usuario 1: javier (Profesor y Administrador)
+dn: cn=Javier Lopez,ou=Usuarios,dc=javier,dc=local
 objectClass: inetOrgPerson
 objectClass: posixAccount
 objectClass: shadowAccount
-cn: Javier
-sn: Profe
+cn: Javier Lopez
+sn: Lopez
+givenName: Javier
 uid: javier
 uidNumber: 10000
-gidNumber: 10000
+gidNumber: 5002
 homeDirectory: /home/javier
 userPassword: root
 mail: javier@javier.local
+telephoneNumber: +34 600 111 222
+description: Profesor y administrador del sistema
 
-dn: cn=Chopy,ou=People,dc=javier,dc=local
+# Usuario 2: chopy (Alumno)
+dn: cn=Chopy Martinez,ou=Usuarios,dc=javier,dc=local
 objectClass: inetOrgPerson
 objectClass: posixAccount
 objectClass: shadowAccount
-cn: Chopy
-sn: Alumno
+cn: Chopy Martinez
+sn: Martinez
+givenName: Chopy
 uid: chopy
 uidNumber: 10001
-gidNumber: 10000
+gidNumber: 5003
 homeDirectory: /home/chopy
 userPassword: example
 mail: chopy@javier.local
+telephoneNumber: +34 600 333 444
+description: Estudiante del curso de DAW
+
+# Usuario 3: ana (Profesora)
+dn: cn=Ana Garcia,ou=Usuarios,dc=javier,dc=local
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: shadowAccount
+cn: Ana Garcia
+sn: Garcia
+givenName: Ana
+uid: ana
+uidNumber: 10002
+gidNumber: 5002
+homeDirectory: /home/ana
+userPassword: prof123
+mail: ana@javier.local
+telephoneNumber: +34 600 555 666
+description: Profesora de bases de datos
+
+# Usuario 4: pedro (Alumno)
+dn: cn=Pedro Sanchez,ou=Usuarios,dc=javier,dc=local
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: shadowAccount
+cn: Pedro Sanchez
+sn: Sanchez
+givenName: Pedro
+uid: pedro
+uidNumber: 10003
+gidNumber: 5003
+homeDirectory: /home/pedro
+userPassword: alumno123
+mail: pedro@javier.local
+telephoneNumber: +34 600 777 888
+description: Estudiante del curso de DAW
+
+# Usuario 5: admin (Administrador del sistema)
+dn: cn=Admin Sistema,ou=Usuarios,dc=javier,dc=local
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: shadowAccount
+cn: Admin Sistema
+sn: Sistema
+givenName: Admin
+uid: admin
+uidNumber: 10004
+gidNumber: 5001
+homeDirectory: /home/admin
+userPassword: admin123
+mail: admin@javier.local
+telephoneNumber: +34 600 999 000
+description: Administrador del sistema
