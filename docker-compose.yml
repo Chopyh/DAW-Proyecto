@@ -14,7 +14,8 @@ services:
       - ./bind9/zones:/var/lib/bind
 
   dns-slave:
-    image: ubuntu/bind9
+    build:
+      context: ./bind9-slave
     container_name: dns_slave_javier
     user: root
     networks:
