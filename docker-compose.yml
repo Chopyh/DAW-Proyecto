@@ -71,8 +71,10 @@ services:
     volumes:
       - ./kanboard/data:/var/www/app/data
       - ./kanboard/plugins:/var/www/app/plugins
+      - ./kanboard/config.php:/var/www/app/config.php:ro
     depends_on:
       - dns
+      - ldap
     dns:
       - 172.20.0.13
 

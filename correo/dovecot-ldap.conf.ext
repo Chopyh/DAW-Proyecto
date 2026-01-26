@@ -6,7 +6,7 @@ dn = cn=admin,dc=javier,dc=local
 dnpass = admin
 
 auth_bind = yes
-pass_attrs = uid=user,userPassword=password
-pass_filter = (|(uid=%u)(mail=%u))
+pass_attrs = uid=user
+pass_filter = (|(uid=%n)(mail=%u))
 user_attrs = homeDirectory=home,uidNumber=uid,gidNumber=gid
-user_filter = (|(uid=%u)(mail=%u))
+user_filter = (|(uid=%n)(mail=%u))

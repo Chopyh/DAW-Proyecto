@@ -1,10 +1,44 @@
-# 🏢 Proyecto de Infraestructura DAW: EduTech Solutions
+﻿# Proyecto de Infraestructura DAW: EduTech Solutions
 
-Infraestructura de red empresarial completa desplegada con Docker Compose. Incluye DNS (maestro/esclavo), servidor web Apache con SSL, servidor de aplicaciones Tomcat, correo seguro (Postfix + Dovecot), directorio LDAP centralizado y gestión de proyectos con Kanboard.
+## Credenciales de Acceso
+
+### Administración LDAP
+
+| Servicio           | URL                   | Usuario                       | Contraseña |
+| ------------------ | --------------------- | ----------------------------- | ---------- |
+| **phpLDAPadmin**   | http://localhost:8080 | `cn=admin,dc=javier,dc=local` | `admin`    |
+| **LDAP (directo)** | ldap://localhost:389  | `cn=admin,dc=javier,dc=local` | `admin`    |
+
+### Kanboard (Gestión de Proyectos)
+
+| URL                            | Usuario | Contraseña |
+| ------------------------------ | ------- | ---------- |
+| https://proyectos.javier.local | `admin` | `admin`    |
+
+### Usuarios del Sistema (LDAP + Correo)
+
+| Usuario  | Email               | Contraseña  | Grupo           | Descripción               |
+| -------- | ------------------- | ----------- | --------------- | ------------------------- |
+| `javier` | javier@javier.local | `root`      | profesores      | Profesor y administrador  |
+| `chopy`  | chopy@javier.local  | `example`   | alumnos         | Estudiante DAW            |
+| `ana`    | ana@javier.local    | `prof123`   | profesores      | Profesora de BBDD         |
+| `pedro`  | pedro@javier.local  | `alumno123` | alumnos         | Estudiante DAW            |
+| `admin`  | admin@javier.local  | `admin123`  | administradores | Administrador del sistema |
+
+### Configuración Cliente de Correo
+
+| Parámetro         | Valor                                             |
+| ----------------- | ------------------------------------------------- |
+| **Servidor IMAP** | mail.javier.local                                 |
+| **Puerto IMAP**   | 993 (SSL) o 143 (STARTTLS)                        |
+| **Servidor SMTP** | mail.javier.local                                 |
+| **Puerto SMTP**   | 587 (STARTTLS) o 465 (SSL)                        |
+| **Autenticación** | Contraseña normal                                 |
+| **Usuario**       | nombre de usuario (ej: `javier`) o email completo |
 
 ---
 
-## 📋 Índice
+## Índice
 
 1. [Arquitectura General](#-arquitectura-general)
 2. [Requisitos Previos](#-requisitos-previos)
@@ -23,7 +57,7 @@ Infraestructura de red empresarial completa desplegada con Docker Compose. Inclu
 
 ---
 
-## 🏗 Arquitectura General
+## Arquitectura General
 
 ### Diagrama de Red
 
@@ -71,7 +105,7 @@ Infraestructura de red empresarial completa desplegada con Docker Compose. Inclu
 
 ---
 
-## ⚙ Requisitos Previos
+## Requisitos Previos
 
 - **Docker** >= 20.10
 - **Docker Compose** >= 2.0
@@ -80,7 +114,7 @@ Infraestructura de red empresarial completa desplegada con Docker Compose. Inclu
 
 ---
 
-## 🚀 Inicio Rápido
+## Inicio Rápido
 
 ### 1. Clonar el repositorio
 
@@ -138,7 +172,7 @@ Añadir al archivo hosts (`C:\Windows\System32\drivers\etc\hosts` en Windows, `/
 
 ---
 
-## 🌐 Configuración DNS
+## Configuración DNS
 
 ### Servidor Maestro (172.20.0.13)
 
@@ -194,7 +228,7 @@ Replica automáticamente las zonas del maestro mediante transferencia de zona (A
 
 ---
 
-## 🌍 Servidor Web Apache
+## Servidor Web Apache
 
 ### Configuración General
 
@@ -264,7 +298,7 @@ apache/
 
 ---
 
-## ☕ Servidor de Aplicaciones Tomcat
+## Servidor de Aplicaciones Tomcat
 
 - **Imagen:** `tomcat:9.0`
 - **IP interna:** 172.20.0.14
@@ -283,7 +317,7 @@ docker-compose restart tomcat
 
 ---
 
-## 📊 Gestión de Proyectos - Kanboard
+## Gestión de Proyectos - Kanboard
 
 - **Imagen:** `kanboard/kanboard:latest`
 - **IP interna:** 172.20.0.19
@@ -300,7 +334,7 @@ kanboard/
 
 ---
 
-## 📁 Directorio LDAP
+## Directorio LDAP
 
 ### Configuración del Servidor
 
@@ -365,7 +399,7 @@ docker-compose up -d
 
 ---
 
-## 📧 Servidor de Correo
+## Servidor de Correo
 
 ### Componentes
 
@@ -441,7 +475,7 @@ Los usuarios de correo son los mismos del LDAP:
 
 ---
 
-## 🔐 Certificados SSL/TLS
+## Certificados SSL/TLS
 
 ### Apache (Web)
 
@@ -477,7 +511,7 @@ docker run --rm -v "${PWD}/correo/certs:/out" ubuntu:22.04 sh -c "\
 
 ---
 
-## 🧪 Comandos de Prueba
+## Comandos de Prueba
 
 ### Verificar DNS
 
@@ -546,7 +580,7 @@ docker-compose exec ldap ldapsearch -x -H ldap://localhost \
 
 ---
 
-## 🔧 Resolución de Problemas
+## Resolución de Problemas
 
 ### DNS no resuelve después de cambios
 
@@ -605,7 +639,7 @@ docker-compose exec apache ping -c 2 kanboard
 
 ---
 
-## 📂 Estructura del Proyecto
+## Estructura del Proyecto
 
 ```
 DAW-Proyecto/
@@ -673,13 +707,13 @@ DAW-Proyecto/
 
 ---
 
-## 📄 Licencia
+## Licencia
 
 Proyecto educativo para el módulo de Despliegue de Aplicaciones Web (DAW).
 
 ---
 
-## 👥 Autores
+## Autores
 
 - **Javier** - Desarrollo e infraestructura
 
