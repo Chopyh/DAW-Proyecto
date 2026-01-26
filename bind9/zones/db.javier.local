@@ -1,6 +1,6 @@
 $TTL    604800
 @       IN      SOA     ns1.javier.local. root.javier.local. (
-                              1         ; Serial
+                        2026012601      ; Serial
                          604800         ; Refresh
                           86400         ; Retry
                         2419200         ; Expire
@@ -17,6 +17,7 @@ tomcat  IN      A       172.20.0.14    ; Tomcat
 www     IN      A       172.20.0.15    ; Apache
 ldap    IN      A       172.20.0.16    ; LDAP
 mail    IN      A       172.20.0.18    ; Mail
+proyectos IN    A       172.20.0.19    ; Kanboard
 
 produccion  IN  CNAME   www
 pruebas     IN  CNAME   www

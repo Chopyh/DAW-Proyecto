@@ -35,3 +35,30 @@ virtual_mailbox_maps = ldap:/etc/postfix/ldap-users.cf
 virtual_minimum_uid = 100
 virtual_uid_maps = static:5000
 virtual_gid_maps = static:5000
+
+# TLS para SMTP
+smtpd_use_tls = yes
+smtpd_tls_cert_file = /etc/ssl/mail/mail.crt
+smtpd_tls_key_file = /etc/ssl/mail/mail.key
+smtpd_tls_security_level = may
+smtpd_tls_auth_only = yes
+smtpd_tls_protocols = !SSLv2, !SSLv3
+smtpd_tls_mandatory_protocols = !SSLv2, !SSLv3
+smtpd_tls_ciphers = high
+smtpd_tls_loglevel = 1
+smtpd_tls_received_header = yes
+
+smtp_tls_security_level = may
+smtp_tls_loglevel = 1
+smtp_tls_note_starttls_offer = yes
+
+# SASL con Dovecot para Submission/SMTP AUTH
+smtpd_sasl_auth_enable = yes
+smtpd_sasl_type = dovecot
+smtpd_sasl_path = private/auth
+smtpd_sasl_local_domain = $myhostname
+smtpd_sasl_security_options = noanonymous
+
+# Reglas de relay y destinatarios
+smtpd_recipient_restrictions = permit_mynetworks, permit_sasl_authenticated, reject_unauth_destination
+smtpd_relay_restrictions = permit_mynetworks, permit_sasl_authenticated, defer_unauth_destination

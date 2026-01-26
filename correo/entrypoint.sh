@@ -8,6 +8,33 @@ cp /etc/hosts /var/spool/postfix/etc/hosts
 cp /etc/services /var/spool/postfix/etc/services
 chmod 644 /var/spool/postfix/etc/*
 
+# Permisos de certificados TLS
+if [ -f /etc/ssl/mail/mail.key ]; then
+	chmod 600 /etc/ssl/mail/mail.key
+	chown root:root /etc/ssl/mail/mail.key
+fi
+if [ -f /etc/ssl/mail/mail.crt ]; then
+	chmod 644 /etc/ssl/mail/mail.crt
+fi
+
+# Habilitar servicios Submission (587) y SMTPS (465) si no existen
+if ! grep -q '^submission' /etc/postfix/master.cf; then
+cat <<'EOF' >> /etc/postfix/master.cf
+submission inet n       -       n       -       -       smtpd
+	-o syslog_name=postfix/submission
+	-o smtpd_tls_security_level=encrypt
+	-o smtpd_sasl_auth_enable=yes
+	-o smtpd_client_restrictions=permit_sasl_authenticated,reject
+	-o milter_macro_daemon_name=ORIGINATING
+smtps     inet n       -       n       -       -       smtpd
+	-o syslog_name=postfix/smtps
+	-o smtpd_tls_wrappermode=yes
+	-o smtpd_sasl_auth_enable=yes
+	-o smtpd_client_restrictions=permit_sasl_authenticated,reject
+	-o milter_macro_daemon_name=ORIGINATING
+EOF
+fi
+
 # 2. PREPARAR LOGS (Vital para que no falle el tail)
 touch /var/log/mail.log
 chmod 666 /var/log/mail.log
