@@ -17,18 +17,18 @@ define('LDAP_USERNAME', 'cn=admin,dc=javier,dc=local');
 define('LDAP_PASSWORD', 'admin');
 
 // Base DN donde buscar usuarios
-define('LDAP_ACCOUNT_BASE', 'ou=Usuarios,dc=javier,dc=local');
+define('LDAP_USER_BASE_DN', 'ou=Usuarios,dc=javier,dc=local');
 
 // Filtro para encontrar usuarios (busca por uid o mail)
 define('LDAP_USER_FILTER', '(&(objectClass=inetOrgPerson)(|(uid=%s)(mail=%s)))');
 
 // Mapeo de atributos LDAP a Kanboard
-define('LDAP_ACCOUNT_ID', 'uid');
-define('LDAP_ACCOUNT_FULLNAME', 'cn');
-define('LDAP_ACCOUNT_EMAIL', 'mail');
+define('LDAP_USER_ATTRIBUTE_USERNAME', 'uid');
+define('LDAP_USER_ATTRIBUTE_FULLNAME', 'cn');
+define('LDAP_USER_ATTRIBUTE_EMAIL', 'mail');
 
 // Crear usuario automáticamente en Kanboard si existe en LDAP
-define('LDAP_ACCOUNT_CREATION', true);
+define('LDAP_USER_CREATION', true);
 
 // Configuración de grupos LDAP
 define('LDAP_GROUP_ADMIN_DN', 'cn=administradores,ou=Groups,dc=javier,dc=local');

@@ -69,6 +69,8 @@ services:
     networks:
       red_daw:
         ipv4_address: 172.20.0.19
+    ports:
+      - "8081:80"
     volumes:
       - ./kanboard/data:/var/www/app/data
       - ./kanboard/plugins:/var/www/app/plugins

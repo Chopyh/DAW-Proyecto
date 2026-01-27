@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # 1. COPIA DE SEGURIDAD DE RED
 # Aunque desactivamos chroot, copiamos esto por si alguna librería lo busca
@@ -8,13 +8,13 @@ cp /etc/hosts /var/spool/postfix/etc/hosts
 cp /etc/services /var/spool/postfix/etc/services
 chmod 644 /var/spool/postfix/etc/*
 
-# Permisos de certificados TLS
+# Permisos de certificados TLS (ignorar si el volumen es solo lectura)
 if [ -f /etc/ssl/mail/mail.key ]; then
-	chmod 600 /etc/ssl/mail/mail.key
-	chown root:root /etc/ssl/mail/mail.key
+	chmod 600 /etc/ssl/mail/mail.key 2>/dev/null || true
+	chown root:root /etc/ssl/mail/mail.key 2>/dev/null || true
 fi
 if [ -f /etc/ssl/mail/mail.crt ]; then
-	chmod 644 /etc/ssl/mail/mail.crt
+	chmod 644 /etc/ssl/mail/mail.crt 2>/dev/null || true
 fi
 
 # Habilitar servicios Submission (587) y SMTPS (465) si no existen
@@ -42,7 +42,7 @@ chown syslog:adm /var/log/mail.log
 
 # 3. ARRANCAR SERVICIOS
 echo "Iniciando rsyslog..."
-service rsyslog start
+service rsyslog start 2>/dev/null || true
 
 echo "Iniciando Postfix..."
 service postfix start
